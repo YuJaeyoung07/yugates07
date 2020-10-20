@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import VotingClassifier
 from sklearn import preprocessing
@@ -51,9 +52,9 @@ test_df = transform_features(test_df)
 
 X_titanic_df = transform_features(X_titanic_df)
 
-X_train, X_test, y_train, y_test = train_test_split(X_titanic_df, y_titanic_df, test_size = 0.1, random_state=11)
+X_train, X_test, y_train, y_test = train_test_split(X_titanic_df, y_titanic_df, test_size = 0.11, random_state=11)
 
-params = { 'n_estimators':[100,200,300,400,500], 'learning_rate': [0.005, 0.01,0.05, 0.1]}
+params = { 'n_estimators':[100,200,300,400,500,1000], 'learning_rate': [0.001,0.005, 0.01,0.05, 0.1]}
 
 gb_clf = GradientBoostingClassifier(random_state=0)
 
@@ -68,7 +69,7 @@ pred = grid_cv.best_estimator_.predict(X_test)
 
 print('GBM 정확도:{0:.4f}'.format(accuracy_score(y_test,pred)))
 
-params_dt = {'max_depth':[6,8,10,12,16,20,24], 'min_samples_split': [16,24]}
+params_dt = {'max_depth':[6,8,10,12,16,20,24], 'min_samples_split': [8,16,24]}
 dt_clf = DecisionTreeClassifier(random_state=156)
 grid_cv_dt = GridSearchCV(dt_clf, param_grid = params_dt, scoring= 'accuracy', cv=5, verbose=1)
 grid_cv_dt.fit(X_train,y_train)
@@ -77,7 +78,7 @@ pred_dt = grid_cv_dt.best_estimator_.predict(X_test)
 
 lr_clf = LogisticRegression()
 
-vo_clf = VotingClassifier(estimators=[('LR', lr_clf), ('DT', grid_cv_dt.best_estimator_), ('GB', grid_cv.best_estimator_)])
+vo_clf = VotingClassifier(estimators=[('LR', lr_clf), ('DT', grid_cv_dt.best_estimator_),('GB', grid_cv.best_estimator_)])
 vo_clf.fit(X_train, y_train)
 pred_vo = vo_clf.predict(X_test)
 
